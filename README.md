@@ -1,8 +1,9 @@
+
 # Neural Network Library
 
 This project implements a neural network framework **from scratch** using Python and NumPy. It is applied to the classic **Zoo dataset** to classify animals into one of seven predefined classes.
 
-Here is the dataset link: https://www.kaggle.com/datasets/uciml/zoo-animal-classification
+**Dataset**: [Zoo Animal Classification on Kaggle](https://www.kaggle.com/datasets/uciml/zoo-animal-classification)
 
 The implementation includes:
 
@@ -17,10 +18,10 @@ The implementation includes:
 
 ## Dataset
 
-We use the **Zoo dataset** which includes 101 animals described by 16 boolean features (e.g., "has feathers", "has legs") and a label representing the class of the animal (1 to 7).
+We use the **Zoo dataset**, which includes 101 animals described by 16 boolean features (e.g., "has feathers", "has legs") and a label representing the class of the animal (1 to 7).
 
-- Input shape: (16 features × number of samples)
-- Output: One-hot encoded class labels (7 classes)
+- Input shape: `(number of samples, 16 features)`
+- Output shape: `(number of samples, 7 classes)` (one-hot encoded)
 
 ---
 
@@ -28,11 +29,11 @@ We use the **Zoo dataset** which includes 101 animals described by 16 boolean fe
 
 The neural network can be customized in terms of the number of layers and neurons. A sample configuration used in this project:
 
-- Input Layer: 16 features
-- Hidden Layer 1: 32 neurons, ReLU
-- Hidden Layer 2: 16 neurons, ReLU
-- Hidden Layer 3: 8 neurons, ReLU
-- Output Layer: 7 neurons, Softmax
+- **Input Layer**: 16 features
+- **Hidden Layer 1**: 32 neurons, ReLU activation
+- **Hidden Layer 2**: 16 neurons, ReLU activation
+- **Hidden Layer 3**: 8 neurons, ReLU activation
+- **Output Layer**: 7 neurons, Softmax activation
 
 ---
 
@@ -42,119 +43,130 @@ The neural network can be customized in terms of the number of layers and neuron
 
 Each dense layer implements the following operations:
 
-- **Forward Pass**:
-  \[
-  Z = W \cdot A\_{prev} + b
-  \]
-  \[
-  A = ext{activation}(Z)
-  \]
+**Forward Pass**:
+```text
+Z = W · A_prev + b
+A = activation(Z)
+```
 
-- **Backward Pass** (using chain rule):
-  \[
-  dW = rac{1}{m} \cdot (dZ \cdot A*{prev}^T)
-  \]
-  \[
-  db = rac{1}{m} \cdot \sum dZ
-  \]
-  \[
-  dA*{prev} = W^T \cdot dZ
-  \]
+**Backward Pass** (chain rule):
+```text
+dW = (1/m) · (dZ · A_prev.T)
+db = (1/m) · sum(dZ)
+dA_prev = W.T · dZ
+```
+
+Where:
+- `Z` is the linear output
+- `A` is the activated output
+- `m` is the batch size
+- `W`, `b` are the layer's parameters
+- `dZ`, `dW`, `db` are gradients during backpropagation
+
+---
 
 ### 2. Activation Functions
 
-Includes:
-
+Included:
 - **ReLU** and its derivative
 - **Softmax** (numerically stable)
-- **Sigmoid**, **Tanh**, and **Leaky ReLU** for optional extension
+- Optional: **Sigmoid**, **Tanh**, **Leaky ReLU**
 
-Softmax is used in the output layer for multi-class classification.
+Softmax is used in the final output layer for multi-class classification.
+
+---
 
 ### 3. Loss Function
 
-- **Categorical Crossentropy Loss**:
-  \[
-  L = -\sum y \cdot \log(\hat{y})
-  \]
-  This is combined with softmax to simplify gradient calculation.
+**Categorical Crossentropy Loss**:
+```text
+L = -Σ (y * log(ŷ))
+```
 
-Clipping is used to prevent `log(0)` and ensure numerical stability.
+Where:
+- `y` is the true one-hot label
+- `ŷ` is the predicted softmax output
+
+To ensure numerical stability:
+- `log(0)` is clipped using small epsilon values.
+
+---
 
 ### 4. Optimizers
 
-Supports two optimizers:
+Supported optimizers:
 
-- **Gradient Descent**: Basic weight update rule
-- **Adam**: Combines momentum and RMSProp for adaptive learning
+- **Gradient Descent** (vanilla update rule)
+- **Adam** (adaptive method combining momentum and RMSProp)
+
+---
 
 ### 5. Batch Processing
 
-Data is split into mini-batches during training. This improves generalization and training stability.
+Data is split into mini-batches during training for better generalization and efficiency.
 
-Batch gradient computation:
-
-- Allows vectorized operations (faster)
-- Requires transposing inputs to align dimensions for matrix multiplication
-- Reduces memory consumption per step
+Benefits of batch training:
+- Enables vectorized matrix operations
+- Improves memory efficiency
+- Reduces variance in gradient updates
 
 ---
 
 ## Training and Evaluation
 
 Training involves:
-
 - Mini-batch forward and backward propagation
-- Updating parameters with the selected optimizer
-- Loss monitoring per batch and epoch
+- Parameter updates using the chosen optimizer
+- Loss tracking per epoch
 
-Evaluation is done by computing classification accuracy on a test split.
+Evaluation:
+- Calculates classification accuracy on a held-out test set
 
 ---
 
 ## Prediction
 
-The trained model is used to classify new animals based on their feature vectors. The highest softmax probability is selected as the predicted class.
+After training, the model can predict the class of a new animal based on its 16-feature vector. The predicted class is chosen by selecting the index of the highest probability in the softmax output.
 
 ---
 
 ## Project Structure
 
-- `neural_network_framework.py`: Main training and evaluation logic
-- `DenseLayer`: Defines layer behavior
-- `NeuralNetwork`: Controls the training loop, forward and backward pass
-- Activation and loss function modules
-- Optimizer modules (Adam and GradientDescent)
-- Zoo dataset loading and preprocessing
-- Evaluation and prediction
+- `neural_network_framework.py` – Main training and evaluation logic
+- `DenseLayer` – Defines forward/backward propagation per layer
+- `NeuralNetwork` – Manages overall model, training loop, and evaluation
+- `activations.py` – Implements activation functions
+- `loss.py` – Implements crossentropy loss
+- `optimizers.py` – Contains implementations for GradientDescent and Adam
+- `data_loader.py` – Loads and preprocesses Zoo dataset
 
 ---
 
 ## Extending the Project
 
-Bonus improvements that can be implemented:
+Bonus improvements to try:
 
-- Add support for Dropout regularization
-- Implement additional optimizers (SGD with momentum, RMSProp)
-- Add learning rate decay scheduler
-- Visualize training loss and accuracy
-- Create a more flexible configuration API for network architecture
+- Dropout regularization
+- Additional optimizers (e.g., RMSProp, SGD with momentum)
+- Learning rate decay
+- Training loss/accuracy visualization
+- YAML/JSON config for defining model structure and training params
 
 ---
 
 ## How to Run
 
-1. Upload the dataset (`zoo.csv`) to your working directory or Google Drive
-2. Make sure the dataset path in the script is correctly set
-3. Run the script in a Python environment (e.g., Colab, Jupyter, or local)
-4. Adjust layer configuration or learning parameters as needed
+1. Download the dataset (`zoo.csv`) to your working directory.
+2. Ensure the dataset path is set correctly in the script.
+3. Run the Python script (`.py` file) in Jupyter Notebook, Google Colab, or any Python environment.
+4. Customize the model architecture, learning rate, batch size, and number of epochs as needed.
 
 ---
 
 ## Key Learning Outcomes
 
-- Understanding the mathematics of forward and backpropagation
-- Implementing a neural network without deep learning libraries
-- Grasping how gradient descent and activations affect learning
-- Handling batch-based training and data flow in matrix form
-- Observing how model performance is influenced by architecture and learning configuration
+- Understand forward and backward propagation mechanics
+- Implement a neural network without high-level libraries
+- Learn how gradient descent drives learning
+- Gain experience with batch training and matrix computations
+- Explore the influence of architecture and hyperparameters on model performance
